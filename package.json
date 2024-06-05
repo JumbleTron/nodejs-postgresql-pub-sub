@@ -1,0 +1,12 @@
+{
+  "name": "postgresql-pub-sub",
+  "version": "1.0.0",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "start": "node app.js --watch"
+  },
+  "dependencies": {
+    "express": "~4.19.2"
+  }
+}
