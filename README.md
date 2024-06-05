@@ -28,3 +28,6 @@ npm start
 curl -X GET http://localhost:3000/produce
 
 ```
+
+## TODO
+* Move consumer to the separate process
