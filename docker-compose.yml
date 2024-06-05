@@ -1,0 +1,12 @@
+services:
+
+  postgres:
+    image: postgres:16-alpine
+    restart: on-failure
+    shm_size: 128mb
+    environment:
+      POSTGRES_USER: pub_sub_user
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: pub_sub
+    ports:
+      - "5432:5432"

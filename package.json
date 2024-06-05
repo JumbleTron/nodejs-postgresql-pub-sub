@@ -7,6 +7,8 @@
     "start": "node app.js --watch"
   },
   "dependencies": {
-    "express": "~4.19.2"
+    "bull": "^4.12.9",
+    "express": "~4.19.2",
+    "pg": "^8.12.0"
   }
 }
