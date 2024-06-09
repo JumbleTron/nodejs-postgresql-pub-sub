@@ -1,4 +1,5 @@
 import pkg from 'pg';
+import PgBoss from "pg-boss";
 
 const { Pool } = pkg;
 const pool = new Pool({
@@ -10,3 +11,6 @@ const pool = new Pool({
 });
 
 export default pool;
+
+const connectionString = 'postgres://pub_sub_user:admin@localhost:5432/pub_sub';
+export const pgBoss = new PgBoss(connectionString);

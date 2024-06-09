@@ -1,6 +1,5 @@
 import express from "express";
-import pool from "./db.js";
-import fetchAndProcessJobs from "./consumer.js";
+import pool, { pgBoss } from "./db.js";
 
 const PORT = 3000;
 
@@ -9,7 +8,7 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.get('/produce', async (_,response) => {
+app.get('/produce-select', async (_,response) => {
   const client = await pool.connect();
   try {
     const res = await client.query(
@@ -25,6 +24,22 @@ app.get('/produce', async (_,response) => {
   }
 })
 
+app.get('/produce', async (_,response) => {
+  const boss = pgBoss
+  try {
+    await boss.start();
+    const jobId = await boss.send('example-queue', { exampleData: 'exampleValue' });
+    response.type('application/json');
+    response.status(201);
+    response.send({ id: jobId });
+    console.log(`Job added with ID: ${jobId}`);
+  } catch (err) {
+    console.error('Error produce message:', err);
+  } finally {
+    await boss.stop();
+  }
+})
+
 app.get('/status', (req, res) => {
   res.send({ "status": "up"})
 })
@@ -35,8 +50,6 @@ app.use((_, res) => {
   res.status(404);
   res.send({ error: 'Not found' });
 });
-
-const consumerJobId = setInterval(fetchAndProcessJobs, 3000);
 
 const server = app.listen(PORT, () => {
   console.log(`Starting Express server on http://localhost:${PORT}`)
@@ -67,7 +80,6 @@ process.on('SIGINT', () => {
 });
 
 const cleanupAndExit = () => {
-  clearInterval(consumerJobId)
   pool.end(() => {
     console.log('Closed pool connections');
     process.exit(1);

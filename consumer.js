@@ -1,32 +1,25 @@
-import pool from "./db.js";
+import { pgBoss } from "./db.js";
 
-const fetchAndProcessJobs = async () => {
-    const client = await pool.connect();
-    try {
-        const res = await client.query(
-            'SELECT * FROM job_queue WHERE status = $1 FOR UPDATE SKIP LOCKED',
-            ['pending']
-        );
+const boss = pgBoss
 
-        const jobs = res.rows;
-
-        for (const job of jobs) {
-            try {
-                await client.query('BEGIN');
-                console.log('Processing job:', job);
-                await client.query(
-                    'UPDATE job_queue SET status = $1, updated_at = NOW() WHERE id = $2',
-                    ['processed', job.id]
-                );
-                await client.query('COMMIT');
-            } catch (error) {
-                await client.query('ROLLBACK');
-                console.error('Error processing job:', error);
-            }
-        }
-    } finally {
-        client.release();
-    }
+async function startConsumer() {
+  try {
+    await boss.start();
+    await boss.work('example-queue', async job => {
+      console.log(`Received job: ${job.id} with data:`, job.data);
+      return 'done';
+    });
+    
+    console.log('Consumer started and listening for jobs...');
+  } catch (err) {
+    console.error('Error starting consumer:', err);
+  }
 }
 
-export default fetchAndProcessJobs;
+(async () => {
+  try {
+    await startConsumer();
+  } catch (err) {
+    console.log(err)
+  }
+})()

@@ -23,6 +23,11 @@ CREATE TABLE job_queue (
 npm start
 ```
 
+3. Run consumer with PM2
+```
+pm2 start ecosystem.config.cjs
+```
+
 3. Publish some events by request `/produce` endpoint
 ```
 curl -X GET http://localhost:3000/produce
